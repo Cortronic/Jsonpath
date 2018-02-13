@@ -28,9 +28,6 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "jsonpath.h"
-#include "parser.h"
 }
 
 %syntax_error {

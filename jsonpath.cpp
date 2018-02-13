@@ -20,6 +20,7 @@
 #include <string.h>
 #include <limits.h>
 
+#include "jsonpath.h"
 #include "lemon/parser.c"
 
 struct jp_opcode*

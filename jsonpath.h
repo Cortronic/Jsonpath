@@ -19,8 +19,8 @@
 
 #include <stddef.h>
 
-#include "lexer.h"
 #include "lemon/parser.h"
+#include "lexer.h"
 #include "matcher.h"
 
 struct jp_opcode {
