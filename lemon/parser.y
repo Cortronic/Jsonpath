@@ -57,8 +57,6 @@ segments(A) ::= segment(B).                         { A = B; }
 segment(A) ::= T_DEEP(B) segment(C).                { A = jp_append_op(B, C); }
 segment(A) ::= T_DEEP(B) T_LABEL|T_WILDCARD(C).     { A = jp_append_op(B, C); }
 segment(A) ::= T_DOT T_LABEL|T_WILDCARD(B).         { A = B; }
-// segment(A) ::= T_BROPEN T_NUMBER(B) T_BRCLOSE.      { A = B; }
-segment(A) ::= T_BROPEN union_exps(B) T_BRCLOSE.    { A = B; }
 
 // array slices
 segment(A) ::= T_BROPEN slice_step(B) T_BRCLOSE.    { A = B; }
@@ -77,16 +75,10 @@ union_end(A) ::= union(B) T_NUMBER(C).              { A = B; jp_append_op(A->dow
 union_end(A) ::= union(B).                          { A = B; }
 union(A) ::= T_NUMBER(B) T_UNION(C).                { A = C; A->down = B; }
 
-// ++
+// expressions
+segment(A) ::= T_BROPEN union_exps(B) T_BRCLOSE.    { A = B; }
 union_exps(A) ::= T_FILTER or_exps(B).              { A = B; }
 union_exps(A) ::= or_exps(B).                       { A = B; }
-
-//--
-//union_exps(A) ::= T_FILTER union_exps(B).           { A = B; }
-//union_exps(A) ::= union_exp(B).                     { A = B; A = B->sibling ? jp_alloc_op(s, T_UNION, 0, NULL, B, NULL) : B; }
-
-//union_exp(A) ::= union_exp(B) T_UNION or_exps(C).   { A = jp_append_op(B, C); }
-//union_exp(A) ::= or_exps(B).                        { A = B; }
 
 or_exps(A) ::= or_exp(B).                           { A = B->sibling ? jp_alloc_op(s, T_OR, 0, NULL, B, NULL) : B; }
 

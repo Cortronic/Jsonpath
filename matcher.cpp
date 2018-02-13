@@ -293,7 +293,7 @@ jp_match_string( struct jp_opcode *ptr,
             }
         }
 
-        if (deep && cursor->isObject() || cursor->isArray()) {
+        if (deep && ( cursor->isObject() || cursor->isArray())) {
             Json::ValueIterator it;
 
             for (it = cursor->begin(); it != cursor->end(); it++) {
@@ -330,7 +330,7 @@ jp_match_union( struct jp_opcode *ptr,
         }
     }
 
-    if (deep && (cursor->isObject() || cursor->isArray())) {
+    if (deep && ((cursor->isObject() || cursor->isArray()))) {
         Json::ValueIterator it;
 
         for (it = cursor->begin(); it != cursor->end(); it++) {
@@ -394,7 +394,7 @@ jp_match_slice( struct jp_opcode *ptr,
         }
     }
 
-    if (deep && (cursor->isObject() || cursor->isArray())) {
+    if (deep && ((cursor->isObject() || cursor->isArray()))) {
         Json::ValueIterator it;
 
         for (it = cursor->begin(); it != cursor->end(); it++) {
@@ -429,7 +429,7 @@ jp_match_number( struct jp_opcode *ptr,
                 res = jp_match_next(ptr->sibling, root, next, result );
         }
 
-        if (deep && ( cursor->isObject() || cursor->isArray())) {
+        if (deep && ((cursor->isObject() || cursor->isArray()))) {
             Json::ValueIterator it;
 
             for (it = cursor->begin(); it != cursor->end(); it++) {
