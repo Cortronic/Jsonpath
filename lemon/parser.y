@@ -60,7 +60,7 @@ segment(A) ::= T_DOT T_LABEL|T_WILDCARD(B).         { A = B; }
 // segment(A) ::= T_BROPEN T_NUMBER(B) T_BRCLOSE.      { A = B; }
 segment(A) ::= T_BROPEN union_exps(B) T_BRCLOSE.    { A = B; }
 
-// Array slices
+// array slices
 segment(A) ::= T_BROPEN slice_step(B) T_BRCLOSE.    { A = B; }
 slice_step(A) ::= slice_stop(B) T_SLICE T_NUMBER(C).{ A = B; A->down->sibling->sibling = C; }
 slice_step(A) ::= slice_stop(B) T_SLICE.            { A = B; }
@@ -70,7 +70,7 @@ slice_stop(A) ::= slice_sta(B).                     { A = B; A->down->sibling = 
 slice_sta(A) ::= T_NUMBER(B) T_SLICE(C).            { A = C; A->down = B; }
 slice_sta(A) ::= T_SLICE(B).                        { A = B; A->down = jp_alloc_op(s, T_NUMBER, 0, NULL, NULL); }
 
-// Array unions
+// array unions
 segment(A) ::= T_BROPEN union_end(B) T_BRCLOSE.     { A = B; }
 union(A) ::= union(B) T_NUMBER(C) T_UNION.          { A = B; jp_append_op(A->down, C); }
 union_end(A) ::= union(B) T_NUMBER(C).              { A = B; jp_append_op(A->down, C); }
