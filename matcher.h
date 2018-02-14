@@ -15,15 +15,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef __MATCHER_H_
-#define __MATCHER_H_
+#ifndef MATCHER_H_INCLUDED
+#define MATCHER_H_INCLUDED
 
-namespace Json {
-    class Value;
-}
+#include <vector.h>
 
-Json::Value*
-jp_match( struct jp_opcode* path,
-          Json::Value*      json,
-          Json::Value*      result );
+#include "json/json.h"
+
+typedef std::vector<const Json::Value*> jp_result;
+
+int jp_match( struct jp_opcode* path,
+              Json::Value* json,
+              jp_result* result );
+
+int jp_match( struct jp_opcode* path,
+              const Json::Value& obj,
+              jp_result& res );
+
 #endif

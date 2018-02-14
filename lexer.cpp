@@ -27,6 +27,7 @@ struct token {
 	int (*parse)(const char *buf, struct jp_opcode *op, struct jp_state *s);
 };
 
+/*
 #ifndef strdup
 char* strdup( const char* str ) {
     char* buf = (char*)malloc( strlen( str ) + 1 );
@@ -36,7 +37,7 @@ char* strdup( const char* str ) {
     return NULL;
 }
 #endif
-
+*/
 
 #define dec(o) \
 	((o) - '0')

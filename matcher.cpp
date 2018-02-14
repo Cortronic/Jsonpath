@@ -18,31 +18,37 @@
 #include "json/json.h"
 #include "jsonpath.h"
 
-Json::Value*
+const Json::Value*
 jp_match_next( struct jp_opcode* ptr,
-               Json::Value* root,
-               Json::Value* cur,
-               Json::Value* result,
+               const Json::Value* root,
+               const Json::Value* cur,
+               jp_result*  result,
                bool deep = false );
 
 //---------------------------------------------------------------------------
 
-Json::Value*
-jp_match( struct jp_opcode* path,
-          Json::Value* jsobj,
-          Json::Value* result ) {
+int jp_match( struct jp_opcode* path,
+              const Json::Value* obj,
+              jp_result* res ) {
 
-    jp_match_next( path, jsobj, jsobj, result );
+    jp_match_next( path, obj, obj, res );
 
-    if ( result->size() )
-        return &((*result)[0]);
+    return res->size();
+}
+//---------------------------------------------------------------------------
 
-    return NULL;
+int jp_match( struct jp_opcode* path,
+              const Json::Value& obj,
+              jp_result& res ) {
+
+    jp_match_next( path, &obj, &obj, &res );
+
+    return res.size();
 }
 //---------------------------------------------------------------------------
 
 static bool
-jp_json_to_op( Json::Value* obj, struct jp_opcode* opcode ) {
+jp_json_to_op( const Json::Value* obj, struct jp_opcode* opcode ) {
 
     switch ( obj->type() ) {
 
@@ -69,11 +75,11 @@ jp_json_to_op( Json::Value* obj, struct jp_opcode* opcode ) {
 //---------------------------------------------------------------------------
 
 static bool
-jp_resolve( Json::Value* cursor,
+jp_resolve( const Json::Value* cursor,
             struct jp_opcode* opcode,
             struct jp_opcode* result ) {
 				
-    Json::Value* val = jp_match_next( opcode->down, cursor, cursor, NULL );
+    const Json::Value* val = jp_match_next( opcode->down, cursor, cursor, NULL );
 
     if ( val && val->type() != Json::nullValue ) {
         return jp_json_to_op( val, result );
@@ -83,8 +89,8 @@ jp_resolve( Json::Value* cursor,
 //---------------------------------------------------------------------------
 
 static bool
-jp_resolve( Json::Value* root,
-            Json::Value* cursor,
+jp_resolve( const Json::Value* root,
+            const Json::Value* cursor,
             struct jp_opcode* opcode,
             struct jp_opcode* result ) {
 
@@ -105,8 +111,8 @@ jp_resolve( Json::Value* root,
 
 static bool
 jp_cmp( struct jp_opcode* op,
-        Json::Value* root,
-        Json::Value* cur ) {
+        const Json::Value* root,
+        const Json::Value* cur ) {
         
     int delta;
     struct jp_opcode left, right;
@@ -164,8 +170,8 @@ jp_cmp( struct jp_opcode* op,
 
 static bool
 jp_expr( struct jp_opcode* op,
-         Json::Value* root,
-         Json::Value* cur,
+         const Json::Value* root,
+         const Json::Value* cur,
          const char* key,
          int idx ) {
     struct jp_opcode* sop;
@@ -218,15 +224,15 @@ jp_expr( struct jp_opcode* op,
 }
 //---------------------------------------------------------------------------
 
-static Json::Value*
+static const Json::Value*
 jp_match_expr( struct jp_opcode *ptr,
-               Json::Value* root,
-               Json::Value* cur,
-               Json::Value* result,
+               const Json::Value* root,
+               const Json::Value* cur,
+               jp_result* result,
                bool deep ) {
     int idx;
-    Json::ValueIterator it;
-    Json::Value *tmp = NULL, *res = NULL;
+    Json::ValueConstIterator it;
+    const Json::Value *tmp = NULL, *res = NULL;
 
     switch ( cur->type() ) {
 
@@ -275,18 +281,18 @@ jp_match_expr( struct jp_opcode *ptr,
 }
 //---------------------------------------------------------------------------
 
-static Json::Value*
+static const Json::Value*
 jp_match_string( struct jp_opcode *ptr,
-                 Json::Value* root,
-                 Json::Value* cursor,
-                 Json::Value* result,
+                 const Json::Value* root,
+                 const Json::Value* cursor,
+                 jp_result* result,
                  bool deep ) {
-    Json::Value *res = NULL;
+    const Json::Value *res = NULL;
 
     if (cursor) {
 
         if (cursor->isObject()) {
-            Json::Value* next = &((*cursor)[ptr->str]);
+            const Json::Value* next = &((*cursor)[ptr->str]);
 
             if (!next->empty()) {
                 res = jp_match_next(ptr->sibling, root, next, result);
@@ -294,7 +300,7 @@ jp_match_string( struct jp_opcode *ptr,
         }
 
         if (deep && ( cursor->isObject() || cursor->isArray())) {
-            Json::ValueIterator it;
+            Json::ValueConstIterator it;
 
             for (it = cursor->begin(); it != cursor->end(); it++) {
                 if ( it->isObject() || it->isArray()) {
@@ -307,16 +313,16 @@ jp_match_string( struct jp_opcode *ptr,
 }
 //---------------------------------------------------------------------------
 
-static Json::Value*
+static const Json::Value*
 jp_match_union( struct jp_opcode *ptr,
-                Json::Value* root,
-                Json::Value* cursor,
-                Json::Value* result,
+                const Json::Value* root,
+                const Json::Value* cursor,
+                jp_result* result,
                 bool deep ) {
-    Json::Value *res = NULL;
+    const Json::Value *res = NULL;
 
     if (cursor && cursor->isArray()) {
-        Json::Value* tmp;
+        const Json::Value* tmp;
         struct jp_opcode* sibling = ptr->down;
 
         while (sibling) {
@@ -331,7 +337,7 @@ jp_match_union( struct jp_opcode *ptr,
     }
 
     if (deep && ((cursor->isObject() || cursor->isArray()))) {
-        Json::ValueIterator it;
+        Json::ValueConstIterator it;
 
         for (it = cursor->begin(); it != cursor->end(); it++) {
             if (it->isObject() || it->isArray()) {
@@ -343,16 +349,16 @@ jp_match_union( struct jp_opcode *ptr,
 }
 //--------------------------------------------------------------------------
 
-static Json::Value*
+static const Json::Value*
 jp_match_slice( struct jp_opcode *ptr,
-                Json::Value* root,
-                Json::Value* cursor,
-                Json::Value* result,
+                const Json::Value* root,
+                const Json::Value* cursor,
+                jp_result* result,
                 bool deep ) {
-    Json::Value *res = NULL;
+    const Json::Value *res = NULL;
 
     if (cursor && cursor->isArray()) {
-        Json::Value* tmp;
+        const Json::Value* tmp;
         int start = ptr->down->num;
         int stop  = ptr->down->sibling->num;
         int step  = 0;
@@ -395,7 +401,7 @@ jp_match_slice( struct jp_opcode *ptr,
     }
 
     if (deep && ((cursor->isObject() || cursor->isArray()))) {
-        Json::ValueIterator it;
+        Json::ValueConstIterator it;
 
         for (it = cursor->begin(); it != cursor->end(); it++) {
             if (it->isObject() || it->isArray()) {
@@ -407,19 +413,19 @@ jp_match_slice( struct jp_opcode *ptr,
 }
 //--------------------------------------------------------------------------
 
-static Json::Value*
+static const Json::Value*
 jp_match_number( struct jp_opcode *ptr,
-                 Json::Value* root,
-                 Json::Value* cursor,
-                 Json::Value* result,
+                 const Json::Value* root,
+                 const Json::Value* cursor,
+                 jp_result* result,
                  bool deep ) {
-    Json::Value *res = NULL;
+    const Json::Value *res = NULL;
 
     if (cursor) {
 
         if (cursor->isArray()) {
             int idx = ptr->num;
-            Json::Value* next = NULL;
+            const Json::Value* next = NULL;
 
             if ( idx < 0 )
                 idx += cursor->size();
@@ -430,7 +436,7 @@ jp_match_number( struct jp_opcode *ptr,
         }
 
         if (deep && ((cursor->isObject() || cursor->isArray()))) {
-            Json::ValueIterator it;
+            Json::ValueConstIterator it;
 
             for (it = cursor->begin(); it != cursor->end(); it++) {
                 if (it->isObject() || it->isArray()) {
@@ -443,11 +449,11 @@ jp_match_number( struct jp_opcode *ptr,
 }
 //--------------------------------------------------------------------------
 
-static Json::Value*
+static const Json::Value*
 jp_match_any( struct jp_opcode *ptr,
-              Json::Value* root,
-              Json::Value* cursor,
-              Json::Value* result,
+              const Json::Value* root,
+              const Json::Value* cursor,
+              jp_result* result,
               bool deep ) {
 
     if (ptr->sibling == NULL) {
@@ -455,7 +461,7 @@ jp_match_any( struct jp_opcode *ptr,
 
     } else if (cursor) {
         if (cursor->isObject() || cursor->isArray()) {
-            Json::ValueIterator it;
+            Json::ValueConstIterator it;
 
             for (it = cursor->begin(); it != cursor->end(); it++) {
                 jp_match_next(ptr->sibling, root, &*it, result, deep);
@@ -466,16 +472,17 @@ jp_match_any( struct jp_opcode *ptr,
 }
 //---------------------------------------------------------------------------
 
-static Json::Value*
+static const Json::Value*
 jp_match_next( struct jp_opcode* ptr,
-               Json::Value* root,
-               Json::Value* cursor,
-               Json::Value* result,
+               const Json::Value* root,
+               const Json::Value* cursor,
+               jp_result* result,
                bool deep ) {
 
     if (!ptr) {
-        if (result && result->isArray()) {
-            result->append(*cursor);
+        // if (result && result->isArray()) {
+        if (result) {
+            result->push_back(cursor);
         }
         return cursor;
     }
