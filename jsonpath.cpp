@@ -41,28 +41,26 @@ jp_alloc_op(struct jp_state *s, int type, int num, char *str, ...) {
 	va_list ap;
 	struct jp_opcode *newop, *child;
 
-	newop = (struct jp_opcode*)calloc( 1, sizeof(*newop) +
-	            ( str && strlen(str) ? strlen(str) + 1 : 0 ) );
+    newop = (jp_opcode*)calloc( 1, sizeof(*newop) );
 
-	if (!newop)
-	{
+	if (!newop)	{
 		fprintf(stderr, "Out of memory\n");
-		exit(127);
+		return NULL;
 	}
 
 	newop->type = type;
 	newop->num = num;
-
-	if (str)
-		newop->str = strcpy(((char*)newop) + sizeof(*newop), str);
+    newop->str = str;
 
 	va_start(ap, str);
 
-	while ((child = (struct jp_opcode*)va_arg(ap, void*)) != NULL)
-		if (!newop->down)
+	while ((child = (struct jp_opcode*)va_arg(ap, void*)) != NULL) {
+		if (!newop->down) {
 			newop->down = child;
-		else
+		} else {
 			jp_append_op(newop->down, child);
+        }
+    }
 
 	va_end(ap);
 
@@ -108,8 +106,8 @@ jp_parse(const char *expr) {
 	if (!pParser)
 		return NULL;
 
-	while (len > 0)
-	{
+	while (len > 0) {
+
 		op = jp_get_token(s, ptr, &mlen);
 
 		if (mlen < 0)

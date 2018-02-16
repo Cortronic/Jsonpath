@@ -260,7 +260,7 @@ parse_string(const char *buf, struct jp_opcode *op, struct jp_state *s) {
 		/* terminating quote */
 		else if (*in == q)
 		{
-			op->str = (char*)strdup(str);
+			op->str = strdup(str);
 			return (in - buf) + 2;
 		}
 
@@ -440,15 +440,13 @@ jp_get_token(struct jp_state *s, const char *input, int *mlen) {
 
 	*mlen = match_token(input, &op, s);
 
-	if (*mlen < 0)
-	{
+	if (*mlen < 0) {
 		s->error_code = *mlen;
 		return NULL;
-	}
-	else if (op.type == 0)
-	{
+
+	} else if (op.type == 0) {
 		return NULL;
 	}
 
-	return jp_alloc_op(s, op.type, op.num, op.str, NULL);
+    return jp_alloc_op(s, op.type, op.num, op.str, NULL);
 }
